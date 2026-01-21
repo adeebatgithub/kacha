@@ -80,7 +80,7 @@ class Result(models.Model):
                                 )
 
     def save(self, *args, **kwargs):
-        if self.event.SUB_CATEGORIES == Event.GENERAL_GROUP:
+        if self.event.sub_category == Event.GENERAL_GROUP:
             if self.position == 1:
                 self.point = GroupPoints.First
             elif self.position == 2:

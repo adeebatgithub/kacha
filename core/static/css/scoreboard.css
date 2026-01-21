@@ -1,3 +1,6 @@
+/* =========================================
+   1. VARIABLES & RESET
+   ========================================= */
 :root {
     --bg-dark: #0f0f0f;
     --sidebar-width: 380px;
@@ -21,10 +24,12 @@ body {
     color: var(--text-white);
     height: 100vh;
     display: flex;
-    overflow: hidden;
+    overflow: hidden; /* Hidden on desktop, enabled on mobile below */
 }
 
-/* --- 1. Animated Sidebar Background --- */
+/* =========================================
+   2. SIDEBAR STYLING
+   ========================================= */
 .sidebar {
     width: var(--sidebar-width);
     height: 100%;
@@ -34,6 +39,7 @@ body {
     justify-content: flex-end;
     border-right: 2px solid rgba(255, 255, 255, 0.1);
     overflow: hidden;
+    z-index: 10;
 }
 
 .sidebar-bg {
@@ -45,6 +51,8 @@ body {
     z-index: 0;
     filter: brightness(0.6) contrast(1.2);
     animation: bgDrift 20s infinite alternate ease-in-out;
+    background-size: cover;
+    background-position: center;
 }
 
 @keyframes bgDrift {
@@ -64,7 +72,6 @@ body {
     animation: slideUp 1s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-/* --- 2. Pulsing Subtitle --- */
 .event-subtitle {
     font-size: 1rem;
     letter-spacing: 6px;
@@ -92,18 +99,6 @@ body {
     box-shadow: 0 0 10px var(--accent-pink);
 }
 
-@keyframes pulseGlow {
-    0% {
-        box-shadow: 0 0 0px rgba(255, 45, 123, 0);
-    }
-    50% {
-        box-shadow: 0 0 20px rgba(255, 45, 123, 0.4);
-    }
-    100% {
-        box-shadow: 0 0 0px rgba(255, 45, 123, 0);
-    }
-}
-
 .event-title {
     font-family: 'Oswald', sans-serif;
     font-size: 4rem;
@@ -113,7 +108,41 @@ body {
     text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
-/* --- 3. Card Entrance & Hover Animations --- */
+/* =========================================
+   3. MAIN LAYOUT AREA
+   ========================================= */
+.main-content {
+    flex: 1;
+    position: relative;
+    margin: 30px;
+}
+
+/* View Container Logic (Switching between Scoreboard & Results) */
+.view-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px);
+}
+
+.view-container.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* =========================================
+   4. SCOREBOARD CARDS (Desktop Absolute Layout)
+   ========================================= */
+.scoreboard-canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
 .card {
     position: absolute;
     border-radius: var(--card-radius);
@@ -125,68 +154,7 @@ body {
     animation: cardEntrance 1s backwards;
 }
 
-#card-t1 {
-    animation-delay: 0.2s;
-}
-
-#card-t2 {
-    animation-delay: 0.4s;
-}
-
-#card-t3 {
-    animation-delay: 0.6s;
-}
-
-@keyframes cardEntrance {
-    from {
-        opacity: 0;
-        transform: translateY(100px) scale(0.8);
-        filter: blur(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-    }
-}
-
-/* Score Flash Animation */
-.score-updated {
-    animation: scoreFlash 0.6s ease-out !important;
-}
-
-@keyframes scoreFlash {
-    0% {
-        transform: scale(1);
-        filter: brightness(1);
-    }
-    30% {
-        transform: scale(1.3);
-        filter: brightness(2) drop-shadow(0 0 30px white);
-    }
-    100% {
-        transform: scale(1);
-        filter: brightness(1);
-    }
-}
-
-/* Float effect for Rank 1 */
-.pos-1 {
-    background: linear-gradient(135deg, var(--rank-1-bg), #b53675);
-    animation: float 4s infinite ease-in-out;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0);
-    }
-    50% {
-        transform: translateY(-15px);
-    }
-}
-
-/* --- Shine Effect Over Cards --- */
+/* Shine Effect */
 .card::after {
     content: '';
     position: absolute;
@@ -197,28 +165,6 @@ body {
     background: linear-gradient(45deg, transparent 45%, rgba(255, 255, 255, 0.1) 50%, transparent 55%);
     animation: shine 6s infinite;
     pointer-events: none;
-}
-
-@keyframes shine {
-    0% {
-        transform: translateX(-100%) translateY(-100%);
-    }
-    20%, 100% {
-        transform: translateX(100%) translateY(100%);
-    }
-}
-
-/* Keeping your core layout logic */
-.main-content {
-    flex: 1;
-    position: relative;
-    margin: 30px;
-}
-
-.scoreboard-canvas {
-    position: relative;
-    width: 100%;
-    height: 100%;
 }
 
 .card-header {
@@ -254,12 +200,18 @@ body {
     line-height: 1;
 }
 
+/* --- Positioning & Specific Styles --- */
+
+/* Rank 1 */
 .pos-1 {
     width: calc(60% - 15px);
     height: 100%;
     left: 0;
     top: 0;
     z-index: 3;
+    background: linear-gradient(135deg, var(--rank-1-bg), #b53675);
+    animation: float 4s infinite ease-in-out;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .pos-1 .score {
@@ -267,6 +219,7 @@ body {
     text-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
 }
 
+/* Rank 2 */
 .pos-2 {
     width: calc(40% - 15px);
     height: calc(50% - 15px);
@@ -280,6 +233,7 @@ body {
     font-size: 8rem;
 }
 
+/* Rank 3 */
 .pos-3 {
     width: calc(40% - 15px);
     height: calc(50% - 15px);
@@ -293,182 +247,22 @@ body {
     font-size: 8rem;
 }
 
-/* --- View Switching Logic --- */
-.view-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(20px);
+/* Staggered Animations */
+#card-t1 {
+    animation-delay: 0.2s;
 }
 
-.view-container.active {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(0);
+#card-t2 {
+    animation-delay: 0.4s;
 }
 
-/* --- Recent Results Styling --- */
-.results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 20px;
-    padding: 20px;
+#card-t3 {
+    animation-delay: 0.6s;
 }
 
-.result-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-left: 5px solid var(--accent-pink);
-    border-radius: 12px;
-    padding: 20px;
-    backdrop-filter: blur(10px);
-    animation: slideInRight 0.5s ease-out backwards;
-}
-
-.result-card h1 {
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.5rem;
-    color: var(--accent-pink);
-    text-transform: uppercase;
-}
-
-.result-card h2 {
-    font-size: 0.9rem;
-    opacity: 0.7;
-    margin-bottom: 10px;
-}
-
-.winner-line {
-    font-weight: 700;
-    font-size: 1.2rem;
-    display: flex;
-    justify-content: space-between;
-}
-
-.medal {
-    font-size: 1.4rem;
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* --- Progress Bar --- */
-.timer-bar-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    z-index: 100;
-}
-
-#timer-bar {
-    height: 100%;
-    background: var(--accent-pink);
-    width: 0%;
-    box-shadow: 0 0 15px var(--accent-pink);
-}
-
-.results-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-    gap: 25px;
-    padding-bottom: 50px;
-}
-
-.result-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 25px;
-    backdrop-filter: blur(15px);
-    transition: transform 0.3s ease;
-}
-
-.result-card-header {
-    margin-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 15px;
-}
-
-.result-card h1 {
-    font-family: 'Oswald', sans-serif;
-    font-size: 1.8rem;
-    line-height: 1.2;
-    color: #fff;
-}
-
-.result-card h2 {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: var(--accent-pink);
-    margin-top: 5px;
-}
-
-/* Winner Rows */
-.winner-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    margin-bottom: 8px;
-    border-radius: 10px;
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.winner-name {
-    font-weight: 600;
-    font-size: 1.1rem;
-    letter-spacing: 0.5px;
-}
-
-.medal {
-    font-family: 'Oswald', sans-serif;
-    font-weight: 700;
-    text-transform: uppercase;
-    font-size: 0.9rem;
-}
-
-/* Metal Theming */
-.gold {
-    border-left: 4px solid #FFD700;
-    background: linear-gradient(90deg, rgba(255, 215, 0, 0.1), transparent);
-}
-
-.silver {
-    border-left: 4px solid #C0C0C0;
-    background: linear-gradient(90deg, rgba(192, 192, 192, 0.1), transparent);
-}
-
-.bronze {
-    border-left: 4px solid #CD7F32;
-    background: linear-gradient(90deg, rgba(205, 127, 50, 0.1), transparent);
-}
-
-.gold .medal {
-    color: #FFD700;
-}
-
-.silver .medal {
-    color: #C0C0C0;
-}
-
-.bronze .medal {
-    color: #CD7F32;
-}
-
+/* =========================================
+   5. RESULTS VIEW STYLING
+   ========================================= */
 .results-main-title {
     font-family: 'Oswald', sans-serif;
     font-size: 3rem;
@@ -485,6 +279,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
 }
 
 .result-slide {
@@ -492,15 +287,26 @@ body {
     width: 100%;
     max-width: 900px;
     opacity: 0;
-    transform: scale(0.9) translateY(30px);
+    transform: translateX(100%) scale(0.9); /* Start from right */
     transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     pointer-events: none;
+    filter: blur(10px);
 }
 
 .result-slide.active-result {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translateX(0) scale(1);
     pointer-events: auto;
+    filter: blur(0);
+    z-index: 2;
+}
+
+/* Optional class for exiting slides if using JS */
+.result-slide.exit-left {
+    opacity: 0;
+    transform: translateX(-100%) scale(0.9);
+    filter: blur(10px);
+    z-index: 1;
 }
 
 .result-card-large {
@@ -512,6 +318,28 @@ body {
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
 }
 
+.result-card-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 15px;
+}
+
+.result-card-header h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem;
+    line-height: 1.2;
+    color: #fff;
+}
+
+.result-card-header h2 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent-pink);
+    margin-top: 5px;
+}
+
+/* Winner Blocks */
 .winner-hero.gold {
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), transparent);
     border: 2px solid #FFD700;
@@ -534,6 +362,13 @@ body {
     font-size: 3.5rem;
     display: block;
     line-height: 1;
+    font-weight: 600;
+}
+
+.winner-team {
+    font-size: 1rem;
+    opacity: 0.7;
+    text-transform: uppercase;
 }
 
 .runners-up {
@@ -542,49 +377,278 @@ body {
     gap: 20px;
 }
 
-/* Reusing previous medal row styles with slight size increase */
 .winner-row {
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 15px;
-}
-
-/* --- Slide Transition Container --- */
-.results-stage {
-    position: relative;
-    height: 70vh;
-    width: 100%;
-    overflow: hidden; /* Important to hide the cards when they are off-screen */
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.3);
 }
 
-.result-slide {
-    position: absolute;
-    width: 100%;
-    max-width: 900px;
-    opacity: 0;
-    /* Move to the right by default (Waiting area) */
-    transform: translateX(100%) scale(0.9);
-    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-    filter: blur(10px);
+.winner-row.silver {
+    border-left: 4px solid #C0C0C0;
 }
 
-/* The card currently being shown */
-.result-slide.active-result {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-    pointer-events: auto;
-    filter: blur(0);
-    z-index: 2;
+.winner-row.bronze {
+    border-left: 4px solid #CD7F32;
 }
 
-/* The card that just finished (Exit area) */
-.result-slide.exit-left {
-    opacity: 0;
-    transform: translateX(-100%) scale(0.9);
-    filter: blur(10px);
-    z-index: 1;
+/* =========================================
+   6. ANIMATIONS
+   ========================================= */
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 0px rgba(255, 45, 123, 0);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 45, 123, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 0px rgba(255, 45, 123, 0);
+    }
+}
+
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(100px) scale(0.8);
+        filter: blur(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-100%) translateY(-100%);
+    }
+    20%, 100% {
+        transform: translateX(100%) translateY(100%);
+    }
+}
+
+.score-updated {
+    animation: scoreFlash 0.6s ease-out !important;
+}
+
+@keyframes scoreFlash {
+    0% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+    30% {
+        transform: scale(1.3);
+        filter: brightness(2) drop-shadow(0 0 30px white);
+    }
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+}
+
+/* =========================================
+   7. RESPONSIVE DESIGN (Tablets & Mobile)
+   ========================================= */
+
+/* --- Tablet & Laptops (Max Width: 1024px) --- */
+@media screen and (max-width: 1024px) {
+    :root {
+        --sidebar-width: 300px;
+    }
+
+    .pos-1 .score {
+        font-size: 10rem;
+    }
+
+    .pos-2 .score, .pos-3 .score {
+        font-size: 6rem;
+    }
+
+    .event-title {
+        font-size: 3rem;
+    }
+}
+
+/* --- Mobile Devices (Max Width: 768px) --- */
+@media screen and (max-width: 768px) {
+
+    /* Global Layout Reset */
+    body {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto; /* Enable vertical scroll */
+        overflow-x: hidden;
+    }
+
+    /* Sidebar becomes Header */
+    .sidebar {
+        width: 100%;
+        height: auto;
+        min-height: 180px;
+        border-right: none;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        padding: 0;
+    }
+
+    .sidebar-content {
+        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.6);
+        animation: none;
+    }
+
+    .event-title {
+        font-size: 2.5rem;
+        margin-top: 10px;
+    }
+
+    .main-content {
+        margin: 15px;
+        height: auto;
+        display: block;
+        flex: none;
+    }
+
+    /* Scoreboard: Switch to Grid */
+    .scoreboard-canvas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        height: auto;
+        padding-bottom: 40px;
+    }
+
+    /* Reset Card Positioning */
+    .card {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 180px;
+        transform: none !important;
+        animation: none;
+    }
+
+    /* Rank 1 (Top) */
+    .pos-1 {
+        grid-column: 1 / -1;
+        order: 1;
+        aspect-ratio: 16/9;
+    }
+
+    /* Rank 2 & 3 (Bottom Row) */
+    .pos-2 {
+        order: 2;
+        aspect-ratio: 1/1;
+    }
+
+    .pos-3 {
+        order: 3;
+        aspect-ratio: 1/1;
+    }
+
+    /* Typography Adjustments */
+    .pos-1 .score {
+        font-size: 6rem;
+    }
+
+    .pos-2 .score, .pos-3 .score {
+        font-size: 3.5rem;
+    }
+
+    .team-name {
+        font-size: 1.2rem;
+    }
+
+    .rank {
+        font-size: 1.5rem;
+    }
+
+    /* Results View Adjustments */
+    .results-stage {
+        height: auto;
+        min-height: 60vh;
+    }
+
+    .result-card-large {
+        padding: 25px 20px;
+        border-radius: 20px;
+    }
+
+    .winner-hero.gold {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+        padding: 20px;
+    }
+
+    .winner-hero .winner-name {
+        font-size: 1.8rem;
+    }
+
+    .medal-badge {
+        font-size: 3rem;
+    }
+
+    .runners-up {
+        grid-template-columns: 1fr;
+    }
+
+    .winner-row {
+        padding: 15px;
+    }
+}
+
+/* --- Small Mobile (Max Width: 480px) --- */
+@media screen and (max-width: 480px) {
+    .pos-1 .score {
+        font-size: 4.5rem;
+    }
+
+    .pos-2 .score, .pos-3 .score {
+        font-size: 3rem;
+    }
+
+    .event-title {
+        font-size: 1.8rem;
+    }
+}
+
+
+/* =========================================
+   TV / LARGE SCREEN SAFE AREA
+   ========================================= */
+@media screen and (min-width: 1200px) {
+    body {
+        /* Add extra padding to prevent TV bezel clipping (Overscan) */
+        padding: 20px;
+    }
+
+    .sidebar {
+        /* Round the sidebar corners for a modern TV app look */
+        border-radius: 20px 0 0 20px;
+    }
+
+    .scoreboard-canvas {
+        /* Add a small gap between sidebar and cards */
+        padding-left: 20px;
+    }
 }

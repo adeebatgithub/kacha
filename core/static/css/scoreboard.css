@@ -652,3 +652,36 @@ body {
         padding-left: 20px;
     }
 }
+
+/* =========================================
+   FIX FOR BROKEN NAMES (Long Text Support)
+   ========================================= */
+
+/* 1. Allow the text container to shrink */
+.winner-info {
+    flex: 1; /* Take up available space */
+    min-width: 0; /* CRITICAL: Allows flex child to shrink below content size */
+}
+
+/* 2. Make the name wrap and scale */
+.winner-hero .winner-name {
+    /* Use clamp so it's 3.5rem normally, but shrinks to 2rem if space is tight */
+    font-size: clamp(1rem, 5vw, 2rem);
+
+    /* Allow text to wrap to the next line */
+    white-space: normal;
+
+    /* Break long words if they are still too long (e.g. FATHAHUDHEEN) */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+
+    /* Improve spacing when wrapped */
+    line-height: 1.1;
+    margin-bottom: 5px;
+}
+
+/* 3. Optional: Give the card a bit more width on TV screens */
+.result-card-large {
+    max-width: 95%; /* Increased from fixed 900px */
+    width: 1100px;
+}

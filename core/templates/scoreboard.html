@@ -7,8 +7,7 @@
     <title>Arts Fest - Live Performance Display</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Poppins:wght@400;600;800&display=swap"
-          rel="stylesheet">
+    <link href="{% static 'css/fonts.css' %}" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/scoreboard.css' %}">
     <style>
         .sidebar-bg {
@@ -264,9 +263,9 @@
         const progressBar = document.getElementById('timer-bar');
 
         const TIMES = {
-            scoreboard: 180000,
-            results: 60000,
-            slide: 12000
+            scoreboard: 10000,
+            results: 10000,
+            slide: 2000
         };
 
         let startTime;

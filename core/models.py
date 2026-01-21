@@ -1,6 +1,6 @@
-from django.contrib.auth.models import User
 from django.db import models
 from django.utils.functional import cached_property
+from django.contrib.auth.models import User
 
 from core.result.grade import GroupPoints, IndividualPoints, Grade
 

@@ -8,7 +8,7 @@ from .forms import ResultForm
 
 
 class ResultListView(LoginRequiredMixin, ListView):
-    model = Result
+    queryset = Result.objects.all().order_by('-id')
     template_name = "results/result_list.html"
     context_object_name = "results"
 

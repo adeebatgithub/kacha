@@ -30,11 +30,26 @@ def broadcast_scoreboard_update():
         second = event.results.filter(position=2).first()
         third = event.results.filter(position=3).first()
 
+        def get_first():
+            if first.participant:
+                return first.participant.name.first_name
+            return first.team.name
+
+        def get_second():
+            if second.participant:
+                return second.participant.name.first_name
+            return second.team.name
+
+        def get_third():
+            if third.participant:
+                return third.participant.name.first_name
+            return third.team.name
+
         recent_events.append({'id': event.id, 'name': event.name, 'sub_category': event.get_sub_category_display(),
-            'first_place': {'participant': first.participant.name.username if first else '',
+            'first_place': {'participant': get_first(),
                 'team': first.team.name if first else ''},
-            'second_place': {'participant': second.participant.name.username if second else ''},
-            'third_place': {'participant': third.participant.name.username if third else ''}})
+            'second_place': {'participant': get_second()},
+            'third_place': {'participant': get_third()}})
 
     # Send to group
     async_to_sync(channel_layer.group_send)('scoreboard', {'type': 'scoreboard_update',

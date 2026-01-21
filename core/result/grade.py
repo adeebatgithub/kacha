@@ -16,3 +16,5 @@ class Grade:
     A: int = 5
     B: int = 3
     C: int = 1
+    D: int = 0
+    E: int = 0

@@ -38,8 +38,9 @@
     </style>
 </head>
 <body>
-
-<div class="connection-status disconnected" id="connection-status">Connecting...</div>
+{% if request.user.is_authenticated %}
+    <div class="connection-status disconnected" id="connection-status">Connecting...</div>
+{% endif %}
 
 <aside class="sidebar">
     <div class="sidebar-bg"></div>
@@ -56,7 +57,7 @@
                 <div id="card-t{{ team.id }}" class="card pos-{{ forloop.counter }}">
                     <div class="card-header">
                         <span class="rank" id="rank-t{{ team.id }}">#{{ forloop.counter }}</span>
-                        <span class="team-name" id="name-t{{ team.id }}">{{ team.name }}</span>
+                        <span class="team-name" id="name-t{{ team.id }}">{{ team.name|upper }}</span>
                     </div>
                     <div class="card-body">
                         <span class="score" id="score-t{{ team.id }}"
@@ -75,16 +76,16 @@
                 <div class="result-slide {% if forloop.first %}active-result{% endif %}">
                     <div class="result-card-large">
                         <div class="result-card-header">
-                            <h1>{{ event.name }}</h1>
-                            <h2>{{ event.get_sub_category_display }}</h2>
+                            <h1>{{ event.name|upper }}</h1>
+                            <h2>{{ event.get_sub_category_display|upper }}</h2>
                         </div>
 
                         <div class="winners-display">
                             <div class="winner-hero gold">
                                 <div class="medal-badge">1st</div>
                                 <div class="winner-info">
-                                    <span class="winner-name">{{ event.first_place.participant.name.username }}</span>
-                                    <span class="winner-team">{{ event.first_place.team.name }}</span>
+                                    <span class="winner-name">{{ event.first_place.participant.name.first_name|upper }}</span>
+                                    <span class="winner-team">{{ event.first_place.team.name|upper }}</span>
                                 </div>
                             </div>
 
@@ -92,11 +93,13 @@
                                 <div class="winner-row silver">
                                     <span class="medal">🥈 2nd</span>
                                     <span class="winner-name">{{ event.second_place.participant.name.username }}</span>
+                                    <span class="winner-team">{{ event.second_place.team.name|upper }}</span>
                                 </div>
 
                                 <div class="winner-row bronze">
                                     <span class="medal">🥉 3rd</span>
                                     <span class="winner-name">{{ event.third_place.participant.name.username }}</span>
+                                    <span class="winner-team">{{ event.third_place.team.name|upper }}</span>
                                 </div>
                             </div>
                         </div>
@@ -261,9 +264,9 @@
         const progressBar = document.getElementById('timer-bar');
 
         const TIMES = {
-            scoreboard: 180000, // 10 seconds
-            results: 60000,     // 5 seconds total for results view
-            slide: 12000        // 1 second per result slide
+            scoreboard: 180000,
+            results: 60000,
+            slide: 12000
         };
 
         let startTime;

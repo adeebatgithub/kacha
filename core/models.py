@@ -1,8 +1,8 @@
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.functional import cached_property
 
 from core.result.grade import GroupPoints, IndividualPoints, Grade
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
@@ -23,6 +23,9 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.name}({self.get_category_display()}-{self.get_sub_category_display()})"
+
+    class Meta:
+        ordering = ['-id']
 
     @cached_property
     def podium(self):
@@ -70,9 +73,11 @@ class Result(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="results")
     position = models.PositiveSmallIntegerField(choices=POSITIONS, default=1)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    participant = models.ForeignKey(Participant, on_delete=models.CASCADE, null=True)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE, null=True, blank=True)
     point = models.IntegerField(default=0, null=True, blank=True)
-    grade = models.IntegerField(default=0, choices=((Grade.A, "A"), (Grade.B, "B"), (Grade.C, "C"),))
+    grade = models.IntegerField(default=0, choices=(
+    (Grade.A, "A"), (Grade.B, "B"), (Grade.C, "C"), (Grade.D, "D"), (Grade.E, "E"))
+                                )
 
     def save(self, *args, **kwargs):
         if self.event.SUB_CATEGORIES == Event.GENERAL_GROUP:

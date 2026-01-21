@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bold">Kacha Events</h1>
+            <p class="text-secondary">Managing {{ events.count }} active events across all categories.</p>
+        </div>
+        <a href="{% url 'event-create' %}" class="btn btn-kacha-primary px-4 py-2">
+            + Create New Event
+        </a>
+    </div>
+
+    <div class="event-card p-4">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle">
+                <thead>
+                <tr style="border-bottom: 2px solid var(--accent-purple);">
+                    <th class="ps-3">Event Name</th>
+                    <th>Category</th>
+                    <th>Sub Category</th>
+                    <th class="text-end pe-3">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for event in events %}
+                    <tr>
+                        <td class="ps-3 fw-bold">{{ event.name }}</td>
+                        <td>
+                        <span class="badge {% if event.category == 1 %}bg-kacha-copper{% else %}bg-secondary{% endif %}"
+                              style="background-color: {% if event.category == 1 %}var(--accent-copper){% else %}#444{% endif %};">
+                            {{ event.get_category_display }}
+                        </span>
+                        </td>
+                        <td>
+                        <span class="text-info" style="color: var(--accent-purple) !important;">
+                            {{ event.get_sub_category_display }}
+                        </span>
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="{% url 'event-update' event.pk %}" class="btn btn-sm btn-kacha-outline me-2">Manage</a>
+                            <a href="{% url 'event-delete' event.pk %}" onclick="return confirm('?????????????????????')" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            No events found. Click "Create New Event" to get started.
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

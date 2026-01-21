@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ team.name }} | Kacha{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <nav class="mb-4">
+                <a href="{% url 'team-list' %}" class="text-secondary text-decoration-none small">
+                    &larr; Back to Team List
+                </a>
+            </nav>
+
+            <div class="event-card p-5 mb-4 shadow-lg"
+                 style="border-top: 5px solid var(--accent-copper); background: linear-gradient(145deg, #1e1e1e, #121212);">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <span class="badge text-uppercase mb-2" style="background-color: var(--accent-copper);">Team Profile</span>
+                        <h1 class="display-4 fw-bold text-white mb-0">{{ team.name }}</h1>
+                    </div>
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                        <div class="btn-group">
+                            <a href="{% url 'team-update' team.pk %}" class="btn btn-kacha-primary px-4">Edit Team</a>
+                            <a href="{% url 'team-delete' team.pk %}" class="btn btn-outline-danger px-3">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4 border-secondary opacity-25">
+
+                <div class="row">
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label class="text-secondary small text-uppercase fw-bold d-block">Captain</label>
+                        <span class="fs-5 text-white">{{ team.captain.username }}</span>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label class="text-secondary small text-uppercase fw-bold d-block">Vice Captain</label>
+                        <span class="fs-5 text-white">{{ team.vice_captain.username }}</span>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="text-secondary small text-uppercase fw-bold d-block">Total Score</label>
+                        <span class="fs-5 fw-bold" style="color: var(--accent-purple);">
+                        {% if team.total_points %}{{ team.total_points }}{% else %}0{% endif %} pts
+                    </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="event-card p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="rounded-circle p-2 me-3"
+                         style="background: rgba(113, 48, 113, 0.1); color: var(--accent-purple);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                             class="bi bi-person-lines-fill" viewBox="0 0 16 16">
+                            <path d="M6 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-5 6s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zM11 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5zm.5 2.5a.5.5 0 0 0 0 1h4a.5.5 0 0 0 0-1h-4zm2 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2zm0 3a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1h-2z"/>
+                        </svg>
+                    </div>
+                    <h4 class="mb-0 fw-bold">Team Roster</h4>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle">
+                        <thead class="text-secondary small text-uppercase">
+                        <tr style="border-bottom: 2px solid var(--accent-purple);">
+                            <th class="ps-3 py-3">Participant Name</th>
+                            <th class="py-3">Chest No</th>
+                            <th class="py-3 text-end pe-3">Points Contribution</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for participant in participants %}
+                            <tr class="border-bottom border-secondary border-opacity-10">
+                                <td class="ps-3 py-3">
+                                    <span class="fw-bold text-white">{{ participant.name }}</span>
+                                </td>
+                                <td class="py-3">
+                                    <code class="text-info px-2 py-1 rounded" style="background: rgba(0,255,255,0.05);">
+                                        #{{ participant.chest_no }}
+                                    </code>
+                                </td>
+                                <td class="py-3 text-end pe-3">
+                                    <span class="badge"
+                                          style="background-color: rgba(113, 48, 113, 0.2); color: var(--accent-purple); border: 1px solid var(--accent-purple);">
+                                        {{ participant.points }} pts
+                                    </span>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-5 text-secondary italic">
+                                    No participants assigned to this team yet.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <style>
+        /* Styling for Detail View */
+        .event-card {
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            border: 1px solid #333;
+        }
+
+        .display-4 {
+            letter-spacing: -1px;
+        }
+
+        /* Hover effect for roster rows */
+        .table-hover tbody tr:hover {
+            background-color: rgba(180, 107, 74, 0.05) !important;
+        }
+    </style>
+{% endblock %}

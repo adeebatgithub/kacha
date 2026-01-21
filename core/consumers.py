@@ -1,0 +1,67 @@
+# consumers.py
+import json
+
+from channels.db import database_sync_to_async
+from channels.generic.websocket import AsyncWebsocketConsumer
+from django.db.models import Count, Q
+
+from .models import Team, Event
+
+
+class ScoreboardConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.room_group_name = 'scoreboard'
+
+        # Join room group
+        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+        await self.accept()
+
+        # Send initial data
+        await self.send_initial_data()
+
+    async def disconnect(self, close_code):
+        # Leave room group
+        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+
+    async def receive(self, text_data):
+        # Handle incoming messages if needed
+        pass
+
+    async def send_initial_data(self):
+        """Send initial scoreboard data when client connects"""
+        teams = await self.get_ranked_teams()
+        recent_events = await self.get_recent_results()
+
+        await self.send(text_data=json.dumps({'type': 'initial_data', 'teams': teams, 'recent_events': recent_events}))
+
+    async def scoreboard_update(self, event):
+        """Receive scoreboard update from group"""
+        await self.send(text_data=json.dumps(event['data']))
+
+    @database_sync_to_async
+    def get_ranked_teams(self):
+        teams = Team.objects.all()
+        teams_with_points = []
+        for team in teams:
+            teams_with_points.append({'id': team.id, 'name': team.name, 'points': team.points})
+        teams_with_points.sort(key=lambda x: x['points'], reverse=True)
+        return teams_with_points
+
+    @database_sync_to_async
+    def get_recent_results(self):
+        events = (Event.objects.annotate(
+            podium_count=Count("results", filter=Q(results__position__in=[1, 2, 3]), distinct=True)).filter(
+            podium_count=3).order_by("-id")[:5].prefetch_related("results"))
+
+        results = []
+        for event in events:
+            first = event.results.filter(position=1).first()
+            second = event.results.filter(position=2).first()
+            third = event.results.filter(position=3).first()
+
+            results.append({'id': event.id, 'name': event.name, 'sub_category': event.get_sub_category_display(),
+                            'first_place': {'participant': first.participant.name.username if first else '',
+                                            'team': first.team.name if first else ''},
+                            'second_place': {'participant': second.participant.name.username if second else ''},
+                            'third_place': {'participant': third.participant.name.username if third else ''}})
+        return results

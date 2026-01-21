@@ -1,0 +1,378 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arts Fest - Live Performance Display</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Poppins:wght@400;600;800&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/scoreboard.css' %}">
+    <style>
+        .sidebar-bg {
+            background: url('{% static "image/adada.png" %}') no-repeat center center/cover;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+        }
+
+        .connection-status.connected {
+            background: #10b981;
+            color: white;
+        }
+
+        .connection-status.disconnected {
+            background: #ef4444;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="connection-status disconnected" id="connection-status">Connecting...</div>
+
+<aside class="sidebar">
+    <div class="sidebar-bg"></div>
+    <div class="sidebar-content">
+        <div class="event-subtitle">Live Rankings</div>
+        <div class="event-title">Arts<br>Fest 2026</div>
+    </div>
+</aside>
+
+<main class="main-content">
+    <div id="view-scoreboard" class="view-container active">
+        <div class="scoreboard-canvas" id="canvas">
+            {% for team in teams %}
+                <div id="card-t{{ team.id }}" class="card pos-{{ forloop.counter }}">
+                    <div class="card-header">
+                        <span class="rank" id="rank-t{{ team.id }}">#{{ forloop.counter }}</span>
+                        <span class="team-name" id="name-t{{ team.id }}">{{ team.name }}</span>
+                    </div>
+                    <div class="card-body">
+                        <span class="score" id="score-t{{ team.id }}"
+                              data-team-id="{{ team.id }}">{{ team.points }}</span>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div id="view-results" class="view-container">
+        <h2 class="results-main-title">LATEST RESULTS</h2>
+
+        <div class="results-stage" id="results-stage">
+            {% for event in recent_event %}
+                <div class="result-slide {% if forloop.first %}active-result{% endif %}">
+                    <div class="result-card-large">
+                        <div class="result-card-header">
+                            <h1>{{ event.name }}</h1>
+                            <h2>{{ event.get_sub_category_display }}</h2>
+                        </div>
+
+                        <div class="winners-display">
+                            <div class="winner-hero gold">
+                                <div class="medal-badge">1st</div>
+                                <div class="winner-info">
+                                    <span class="winner-name">{{ event.first_place.participant.name.username }}</span>
+                                    <span class="winner-team">{{ event.first_place.team.name }}</span>
+                                </div>
+                            </div>
+
+                            <div class="runners-up">
+                                <div class="winner-row silver">
+                                    <span class="medal">🥈 2nd</span>
+                                    <span class="winner-name">{{ event.second_place.participant.name.username }}</span>
+                                </div>
+
+                                <div class="winner-row bronze">
+                                    <span class="medal">🥉 3rd</span>
+                                    <span class="winner-name">{{ event.third_place.participant.name.username }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <!-- No results available -->
+            {% endfor %}
+        </div>
+    </div>
+</main>
+
+<script>
+    // WebSocket Connection
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${wsProtocol}//${window.location.host}/ws/scoreboard/`;
+    let socket;
+    let reconnectInterval = 3000;
+    const statusIndicator = document.getElementById('connection-status');
+    let hasResults = {{ recent_event|length }} > 0;
+
+    function connectWebSocket() {
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = function (e) {
+            console.log('WebSocket connected');
+            statusIndicator.textContent = 'Live';
+            statusIndicator.className = 'connection-status connected';
+        };
+
+        socket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            console.log('Received:', data);
+
+            if (data.type === 'initial_data' || data.type === 'update') {
+                updateScoreboard(data.teams);
+                updateResults(data.recent_events);
+            }
+        };
+
+        socket.onerror = function (error) {
+            console.error('WebSocket error:', error);
+        };
+
+        socket.onclose = function (e) {
+            console.log('WebSocket disconnected');
+            statusIndicator.textContent = 'Disconnected';
+            statusIndicator.className = 'connection-status disconnected';
+
+            // Attempt to reconnect
+            setTimeout(connectWebSocket, reconnectInterval);
+        };
+    }
+
+    function updateScoreboard(teams) {
+        const canvas = document.getElementById('canvas');
+        const existingCards = Array.from(canvas.querySelectorAll('.card'));
+
+        teams.forEach((team, index) => {
+            const cardId = `card-t${team.id}`;
+            let card = document.getElementById(cardId);
+
+            if (!card) {
+                // Create new card if it doesn't exist
+                card = createTeamCard(team, index + 1);
+                canvas.appendChild(card);
+            }
+
+            // Update rank
+            const rankEl = card.querySelector('.rank');
+            rankEl.textContent = `#${index + 1}`;
+
+            // Update score with animation
+            const scoreEl = card.querySelector('.score');
+            const oldScore = parseInt(scoreEl.textContent) || 0;
+            const newScore = team.points;
+
+            if (oldScore !== newScore) {
+                animateScore(scoreEl, oldScore, newScore);
+            }
+
+            // Update position class
+            card.className = `card pos-${index + 1}`;
+        });
+
+        // Reorder cards if needed
+        if (typeof reorderCards === "function") {
+            reorderCards();
+        }
+    }
+
+    function createTeamCard(team, position) {
+        const card = document.createElement('div');
+        card.id = `card-t${team.id}`;
+        card.className = `card pos-${position}`;
+        card.innerHTML = `
+            <div class="card-header">
+                <span class="rank" id="rank-t${team.id}">#${position}</span>
+                <span class="team-name" id="name-t${team.id}">${team.name}</span>
+            </div>
+            <div class="card-body">
+                <span class="score" id="score-t${team.id}" data-team-id="${team.id}">${team.points}</span>
+            </div>
+        `;
+        return card;
+    }
+
+    function updateResults(events) {
+        const resultsStage = document.getElementById('results-stage');
+
+        // Update hasResults flag
+        hasResults = events && events.length > 0;
+
+        if (!hasResults) {
+            resultsStage.innerHTML = '';
+            return;
+        }
+
+        resultsStage.innerHTML = '';
+
+        events.forEach((event, index) => {
+            const slide = document.createElement('div');
+            slide.className = `result-slide ${index === 0 ? 'active-result' : ''}`;
+            slide.innerHTML = `
+                <div class="result-card-large">
+                    <div class="result-card-header">
+                        <h1>${event.name}</h1>
+                        <h2>${event.sub_category}</h2>
+                    </div>
+                    <div class="winners-display">
+                        <div class="winner-hero gold">
+                            <div class="medal-badge">1st</div>
+                            <div class="winner-info">
+                                <span class="winner-name">${event.first_place.participant}</span>
+                                <span class="winner-team">${event.first_place.team}</span>
+                            </div>
+                        </div>
+                        <div class="runners-up">
+                            <div class="winner-row silver">
+                                <span class="medal">🥈 2nd</span>
+                                <span class="winner-name">${event.second_place.participant}</span>
+                            </div>
+                            <div class="winner-row bronze">
+                                <span class="medal">🥉 3rd</span>
+                                <span class="winner-name">${event.third_place.participant}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            resultsStage.appendChild(slide);
+        });
+    }
+
+    // Initialize WebSocket
+    connectWebSocket();
+
+    // View rotation logic
+    (function () {
+        const scoreboard = document.getElementById('view-scoreboard');
+        const results = document.getElementById('view-results');
+        const progressBar = document.getElementById('timer-bar');
+
+        const TIMES = {
+            scoreboard: 180000, // 10 seconds
+            results: 60000,     // 5 seconds total for results view
+            slide: 12000        // 1 second per result slide
+        };
+
+        let startTime;
+        let currentDuration;
+        let slideInterval;
+        let currentSlideIndex = 0;
+
+        function startRotation() {
+            // Only toggle views if there are results to show
+            if (!hasResults) {
+                // Stay on scoreboard view
+                scoreboard.classList.add('active');
+                results.classList.remove('active');
+
+                // Check again after some time
+                setTimeout(startRotation, TIMES.scoreboard);
+                return;
+            }
+
+            const isScoreboardActive = scoreboard.classList.contains('active');
+            currentDuration = isScoreboardActive ? TIMES.scoreboard : TIMES.results;
+            startTime = performance.now();
+
+            if (!isScoreboardActive) {
+                startSlideShow();
+            } else {
+                stopSlideShow();
+            }
+
+            setTimeout(() => {
+                toggleViews();
+                startRotation();
+            }, currentDuration);
+
+            if (progressBar) {
+                requestAnimationFrame(updateProgressBar);
+            }
+        }
+
+        function startSlideShow() {
+            const slides = document.querySelectorAll('.result-slide');
+            if (slides.length === 0) return;
+
+            currentSlideIndex = 0;
+            showSlide(0);
+            slideInterval = setInterval(() => {
+                currentSlideIndex = (currentSlideIndex + 1) % slides.length;
+                showSlide(currentSlideIndex);
+            }, TIMES.slide);
+        }
+
+        function stopSlideShow() {
+            clearInterval(slideInterval);
+        }
+
+        function showSlide(index) {
+            const slides = document.querySelectorAll('.result-slide');
+
+            slides.forEach((slide, i) => {
+                // Remove all state classes
+                slide.classList.remove('active-result', 'exit-left');
+
+                if (i === index) {
+                    // This is the new slide coming in from the right
+                    slide.classList.add('active-result');
+                } else if (i === (index === 0 ? slides.length - 1 : index - 1)) {
+                    // This is the previous slide, move it to the left
+                    slide.classList.add('exit-left');
+                }
+            });
+        }
+
+        function toggleViews() {
+            // Only toggle if we have results
+            if (hasResults) {
+                scoreboard.classList.toggle('active');
+                results.classList.toggle('active');
+                if (scoreboard.classList.contains('active') && typeof reorderCards === "function") {
+                    reorderCards();
+                }
+            }
+        }
+
+        function updateProgressBar(timestamp) {
+            if (!startTime || !progressBar) return;
+            const elapsed = timestamp - startTime;
+            const progress = Math.min((elapsed / currentDuration) * 100, 100);
+            progressBar.style.width = progress + "%";
+            if (progress < 100) requestAnimationFrame(updateProgressBar);
+        }
+
+        startRotation();
+    })();
+
+    function animateScore(element, start, end) {
+        const duration = 800;
+        const startTime = performance.now();
+
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const current = Math.floor(start + (end - start) * (1 - Math.pow(1 - progress, 3)));
+            element.textContent = current;
+            if (progress < 1) requestAnimationFrame(update);
+        }
+
+        requestAnimationFrame(update);
+    }
+</script>
+
+</body>
+</html>

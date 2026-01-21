@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if object %}Update Result{% else %}Record Result{% endif %} | Kacha{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <nav class="mb-4">
+                <a href="{% url 'result-list' %}" class="text-secondary text-decoration-none small">
+                    &larr; Back to Leaderboard
+                </a>
+            </nav>
+
+            <div class="event-card p-5 shadow-lg" style="border-top: 4px solid var(--accent-copper);">
+                <div class="mb-4">
+                    <h2 class="fw-bold">{% if object %}Modify Result{% else %}New Achievement{% endif %}</h2>
+                    <p class="text-secondary">Allocate points and grades to teams based on performance.</p>
+                </div>
+
+                <form method="post" id="resultForm" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-4">
+                        <label class="form-label small text-uppercase fw-bold" style="color: var(--accent-copper);">Competition
+                            Event</label>
+                        <select name="event" id="id_event"
+                                class="form-select form-select-lg bg-dark text-white border-secondary">
+                            <option value="" selected disabled>-- Select Event --</option>
+                            {% for  val, label in form.fields.event.choices %}
+                                <option value="{{ val }}"
+                                        {% if form.event.value|slugify == val|slugify %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        {% if form.event.errors %}
+                            <div class="text-danger small mt-1">{{ form.event.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small text-uppercase fw-bold text-secondary">Winning Team</label>
+                            <select name="team" class="form-select bg-dark text-white border-secondary">
+                                {% for val, label in form.fields.team.choices %}
+                                    <option value="{{ val }}"
+                                            {% if form.team.value|slugify == val|slugify %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6" id="participant-wrapper">
+                            <label class="form-label small text-uppercase fw-bold text-secondary">Individual
+                                Participant</label>
+                            <select name="participant" id="id_participant"
+                                    class="form-select bg-dark text-white border-secondary">
+                                {% for val, label in form.fields.participant.choices %}
+                                    <option value="{{ val }}"
+                                            {% if form.participant.value|slugify == val|slugify %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <label class="form-label small text-uppercase fw-bold text-secondary">Position</label>
+                            <select name="position" class="form-select bg-dark text-white border-secondary">
+                                {% for val, label in form.fields.position.choices %}
+                                    <option value="{{ val }}"
+                                            {% if form.position.value|slugify == val|slugify %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small text-uppercase fw-bold text-secondary">Grade</label>
+                            <select name="grade" class="form-select bg-dark text-white border-secondary">
+                                {% for val, label in form.fields.grade.choices %}
+                                    <option value="{{ val }}"
+                                            {% if form.grade.value|slugify == val|slugify %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 border-secondary opacity-25">
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <button type="submit" class="btn btn-kacha-primary px-5 py-2 fw-bold">Confirm & Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Input Styling */
+        input, select {
+            background-color: #1a1a1a !important;
+            border: 1px solid #333 !important;
+            color: white !important;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-purple) !important;
+            box-shadow: 0 0 0 0.25rem rgba(113, 48, 113, 0.25) !important;
+        }
+
+        /* Animation for hiding participant field */
+        #participant-wrapper {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .hide-participant {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px);
+        }
+    </style>
+{% endblock %}

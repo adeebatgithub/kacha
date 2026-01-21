@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kacha | {% block title %}Management{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --dark-bg: #121212;
+            --card-bg: #1e1e1e;
+            --accent-copper: #B46B4A;
+            --accent-purple: #713071;
+            --text-light: #f8f9fa;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar {
+            background-color: #000;
+            min-height: 100vh;
+            border-right: 1px solid #333;
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.7);
+            transition: 0.3s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--accent-copper);
+        }
+
+        .btn-kacha-primary {
+            background-color: var(--accent-copper);
+            border: none;
+            color: white;
+        }
+
+        .btn-kacha-primary:hover {
+            background-color: #965a3e;
+            color: white;
+        }
+
+        .btn-kacha-outline {
+            border: 2px solid var(--accent-purple);
+            color: white;
+        }
+
+        .btn-kacha-outline:hover {
+            background-color: var(--accent-purple);
+            color: white;
+        }
+
+        .event-card {
+            background-color: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 12px;
+        }
+
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block sidebar p-4">
+            <h2 class="fw-bold mb-4" style="color: var(--accent-copper);">KACHA</h2>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2">
+                    <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'result-list' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Result</a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'event-list' %}" class="nav-link">Events</a>
+                </li>
+                <li class="nav-item mb-2">
+                    <a href="{% url 'team-list' %}" class="nav-link">Teams</a>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="col-md-10 p-5">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

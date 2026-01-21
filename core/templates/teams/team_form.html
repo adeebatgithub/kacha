@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if team %}Update Team{% else %}Create Team{% endif %} | Kacha{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="d-flex justify-content-between align-items-end mb-4">
+                <div>
+                    <h1 class="fw-bold">{% if team %}Edit Team: {{ team.name }}{% else %}Register New
+                        Team{% endif %}</h1>
+                    <p class="text-secondary">Assign registered users to this team and set their details.</p>
+                </div>
+                <a href="{% url 'team-list' %}" class="btn btn-link text-secondary mb-2">Discard Changes</a>
+            </div>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="event-card p-4 mb-4" style="border-left: 5px solid var(--accent-copper);">
+                    <h4 class="mb-4 fw-bold">Team Information</h4>
+                    <div class="row g-3">
+                        {% for field in form %}
+                            <div class="col-md-4">
+                                <label class="form-label small text-uppercase fw-bold text-secondary">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="event-card p-4 mb-4" style="border-left: 5px solid var(--accent-purple);">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h4 class="mb-0 fw-bold">Assign Participants</h4>
+                        <button type="button" class="btn btn-sm btn-kacha-outline" id="add-participant-btn">
+                            + Add Participant
+                        </button>
+                    </div>
+
+                    {{ participants.management_form }}
+
+                    <div class="table-responsive">
+                        <table class="table table-dark table-borderless align-middle" id="participant-table">
+                            <thead class="text-secondary small text-uppercase">
+                            <tr>
+                                <th style="width: 40%;">Select User</th>
+                                <th style="width: 25%;">Chest No</th>
+                                <th class="text-center">Remove</th>
+                            </tr>
+                            </thead>
+                            <tbody id="formset-container">
+                            {% for p_form in participants %}
+                                <tr class="formset-row border-bottom border-secondary border-opacity-10">
+                                    <td>
+                                        {% for hidden in p_form.hidden_fields %}{{ hidden }}{% endfor %}
+                                        {{ p_form.name }}
+                                        {% if p_form.name.errors %}
+                                            <div class="text-danger small mt-1">{{ p_form.name.errors|join:", " }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ p_form.chest_no }}
+                                        {% if p_form.chest_no.errors %}
+                                            <div class="text-danger small mt-1">{{ p_form.chest_no.errors|join:", " }}</div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-sm btn-outline-danger delete-form-row">
+                                            Delete
+                                        </button>
+                                        <div class="d-none">{{ p_form.DELETE }}</div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-kacha-primary px-5 py-2 fw-bold">Save Team</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        /* Force consistent dark theme for ALL inputs and selects */
+        input, select, .form-control, .form-select {
+            background-color: #1a1a1a !important;
+            border: 1px solid #333 !important;
+            color: #ffffff !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-copper) !important;
+            box-shadow: 0 0 0 0.25rem rgba(180, 107, 74, 0.25) !important;
+            outline: none;
+        }
+
+        /* Style for dropdown options */
+        select option {
+            background-color: #1a1a1a;
+            color: white;
+        }
+
+        .event-card {
+            background-color: #1e1e1e;
+            border-radius: 12px;
+        }
+
+        /* Add animation for new rows */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .formset-row.new-row {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        /* Fade out animation */
+        .formset-row.fade-out {
+            animation: fadeOut 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+{% endblock %}

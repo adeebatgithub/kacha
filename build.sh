@@ -12,9 +12,8 @@ python manage.py migrate --noinput
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
-if [[ -n "$DJANGO_SUPERUSER_USERNAME" ]] && [[ -n "$DJANGO_SUPERUSER_EMAIL" ]] && [[ -n "$DJANGO_SUPERUSER_PASSWORD" ]]; then
-  echo "Creating superuser (if it does not already exist)..."
-  python manage.py shell <<EOF
+echo "Creating superuser (if it does not already exist)..."
+python manage.py shell <<EOF
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -27,6 +26,3 @@ if not User.objects.filter(username=username).exists():
 else:
     print("Superuser already exists. Skipping.")
 EOF
-else
-  echo "Superuser environment variables not set. Skipping superuser creation."
-fi

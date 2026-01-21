@@ -1,8 +1,10 @@
 from django.db import models
 from django.utils.functional import cached_property
-from django.contrib.auth.models import User
 
 from core.result.grade import GroupPoints, IndividualPoints, Grade
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class Event(models.Model):

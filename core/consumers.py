@@ -5,11 +5,11 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.db.models import Count, Q
 
-from .models import Team, Event
 
 
 class ScoreboardConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        from .models import Team, Event
         self.room_group_name = 'scoreboard'
 
         # Join room group

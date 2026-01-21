@@ -1,9 +1,9 @@
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from core.models import Event
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-
-class EventListView(ListView):
+class EventListView(LoginRequiredMixin, ListView):
     model = Event
     template_name = 'events/event_list.html'
     context_object_name = 'events'
@@ -11,13 +11,13 @@ class EventListView(ListView):
     ordering = ['-id']
 
 
-class EventDetailView(DetailView):
+class EventDetailView(LoginRequiredMixin, DetailView):
     model = Event
     template_name = 'events/event_detail.html'
     context_object_name = 'event'
 
 
-class EventCreateView(CreateView):
+class EventCreateView(LoginRequiredMixin, CreateView):
     model = Event
     template_name = 'events/event_form.html'
     fields = ['name', 'category', 'sub_category']
@@ -27,7 +27,7 @@ class EventCreateView(CreateView):
         return super().form_valid(form)
 
 
-class EventUpdateView(UpdateView):
+class EventUpdateView(LoginRequiredMixin, UpdateView):
     model = Event
     template_name = 'events/event_form.html'
     fields = ['name', 'category', 'sub_category']
@@ -35,7 +35,7 @@ class EventUpdateView(UpdateView):
     context_object_name = 'event'
 
 
-class EventDeleteView(DeleteView):
+class EventDeleteView(LoginRequiredMixin, DeleteView):
     model = Event
     template_name = 'events/event_confirm_delete.html'
     success_url = reverse_lazy('event-list')

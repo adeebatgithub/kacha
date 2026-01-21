@@ -1,4 +1,5 @@
 # views.py
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import (ListView, CreateView, UpdateView, DeleteView)
 
@@ -6,13 +7,13 @@ from core.models import Result
 from .forms import ResultForm
 
 
-class ResultListView(ListView):
+class ResultListView(LoginRequiredMixin, ListView):
     model = Result
     template_name = "results/result_list.html"
     context_object_name = "results"
 
 
-class ResultCreateView(CreateView):
+class ResultCreateView(LoginRequiredMixin, CreateView):
     model = Result
     form_class = ResultForm
     template_name = "results/result_form.html"
@@ -22,14 +23,14 @@ class ResultCreateView(CreateView):
         print(form.errors)
 
 
-class ResultUpdateView(UpdateView):
+class ResultUpdateView(LoginRequiredMixin, UpdateView):
     model = Result
     fields = ["event", "position", "team", "participant", "point", "grade"]
     template_name = "results/result_form.html"
     success_url = reverse_lazy("result-list")
 
 
-class ResultDeleteView(DeleteView):
+class ResultDeleteView(LoginRequiredMixin, DeleteView):
     model = Result
     success_url = reverse_lazy("result-list")
 

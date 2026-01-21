@@ -1,4 +1,5 @@
 # views.py
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -8,7 +9,7 @@ from .forms import TeamForm, ParticipantFormSet
 from core.models import Team
 
 
-class TeamListView(ListView):
+class TeamListView(LoginRequiredMixin, ListView):
     model = Team
     template_name = 'teams/team_list.html'
     context_object_name = 'teams'
@@ -16,7 +17,7 @@ class TeamListView(ListView):
     ordering = ['-id']
 
 
-class TeamDetailView(DetailView):
+class TeamDetailView(LoginRequiredMixin, DetailView):
     model = Team
     template_name = 'teams/team_detail.html'
     context_object_name = 'team'
@@ -27,7 +28,7 @@ class TeamDetailView(DetailView):
         return context
 
 
-class TeamCreateView(CreateView):
+class TeamCreateView(LoginRequiredMixin, CreateView):
     model = Team
     form_class = TeamForm
     template_name = 'teams/team_form.html'
@@ -56,7 +57,7 @@ class TeamCreateView(CreateView):
         return redirect(self.success_url)
 
 
-class TeamUpdateView(UpdateView):
+class TeamUpdateView(LoginRequiredMixin, UpdateView):
     model = Team
     form_class = TeamForm
     template_name = 'teams/team_form.html'
@@ -93,7 +94,7 @@ class TeamUpdateView(UpdateView):
         return redirect(self.success_url)
 
 
-class TeamDeleteView(DeleteView):
+class TeamDeleteView(LoginRequiredMixin, DeleteView):
     model = Team
     template_name = 'teams/team_confirm_delete.html'
     success_url = reverse_lazy('team-list')

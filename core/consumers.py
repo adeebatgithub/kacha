@@ -3,13 +3,12 @@ import json
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+from django.apps import apps
 from django.db.models import Count, Q
-
 
 
 class ScoreboardConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        from .models import Team, Event
         self.room_group_name = 'scoreboard'
 
         # Join room group
@@ -40,6 +39,7 @@ class ScoreboardConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_ranked_teams(self):
+        Team = apps.get_model("core", "Team")
         teams = Team.objects.all()
         teams_with_points = []
         for team in teams:
@@ -49,6 +49,7 @@ class ScoreboardConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_recent_results(self):
+        Event = apps.get_model("core", "Event")
         events = (Event.objects.annotate(
             podium_count=Count("results", filter=Q(results__position__in=[1, 2, 3]), distinct=True)).filter(
             podium_count=3).order_by("-id")[:5].prefetch_related("results"))

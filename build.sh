@@ -3,7 +3,7 @@ set -o errexit
 set -o pipefail
 
 echo "Installing dependencies..."
-pip install -r requirements.txt
+pip install -r req.txt
 
 echo "Running database migrations..."
 python manage.py makemigrations --noinput

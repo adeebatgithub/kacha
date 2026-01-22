@@ -61,19 +61,22 @@ class ScoreboardConsumer(AsyncWebsocketConsumer):
             third = event.results.filter(position=3).first()
 
             def get_first():
-                if first.participant:
-                    return first.participant.name.first_name
-                return first.team.name
+                if first:
+                    if first.participant:
+                        return first.participant.name.first_name
+                    return first.team.name
 
             def get_second():
-                if second.participant:
-                    return second.participant.name.first_name
-                return second.team.name
+                if second:
+                    if second.participant:
+                        return second.participant.name.first_name
+                    return second.team.name
 
             def get_third():
-                if third.participant:
-                    return third.participant.name.first_name
-                return third.team.name
+                if third:
+                    if third.participant:
+                        return third.participant.name.first_name
+                    return third.team.name
 
             results.append({'id': event.id, 'name': event.name, 'sub_category': event.get_sub_category_display(),
                             'first_place': {'participant': get_first(),

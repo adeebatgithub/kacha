@@ -57,6 +57,11 @@ class Team(models.Model):
         totals = Result.objects.filter(team=self).aggregate(points=models.Sum('point'), grade=models.Sum('grade'), )
         return (totals["points"] or 0) + (totals["grade"] or 0)
 
+    def individual_points(self):
+        totals = Result.objects.filter(team=self, participant__isnull=False).aggregate(points=models.Sum('point'),
+                                                                                       grade=models.Sum('grade'), )
+        return (totals["points"] or 0) + (totals["grade"] or 0)
+
 
 class Participant(models.Model):
     name = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -67,6 +72,11 @@ class Participant(models.Model):
     def __str__(self):
         return self.name.username
 
+    @property
+    def total_points(self):
+        totals = Result.objects.filter(participant=self).aggregate(points=models.Sum('point'), grade=models.Sum('grade'), )
+        return (totals["points"] or 0) + (totals["grade"] or 0)
+
 
 class Result(models.Model):
     POSITIONS = ((1, "First"), (2, "Second"), (3, "Third"),)
@@ -76,7 +86,7 @@ class Result(models.Model):
     participant = models.ForeignKey(Participant, on_delete=models.CASCADE, null=True, blank=True)
     point = models.IntegerField(default=0, null=True, blank=True)
     grade = models.IntegerField(default=0, choices=(
-    (Grade.A, "A"), (Grade.B, "B"), (Grade.C, "C"), (Grade.D, "D"), (Grade.E, "E"))
+        (Grade.A, "A"), (Grade.B, "B"), (Grade.C, "C"), (Grade.D, "D"), (Grade.E, "E"))
                                 )
 
     def save(self, *args, **kwargs):
@@ -95,5 +105,9 @@ class Result(models.Model):
                 self.point = IndividualPoints.Second
             elif self.position == 3:
                 self.point = IndividualPoints.Third
+
+        if self.participant:
+            self.participant.points += (self.point + self.grade)
+            self.participant.save()
 
         return super().save(*args, **kwargs)

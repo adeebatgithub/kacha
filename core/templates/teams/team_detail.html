@@ -32,19 +32,25 @@
                 <hr class="my-4 border-secondary opacity-25">
 
                 <div class="row">
-                    <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="col-md-3 mb-3 mb-md-0">
                         <label class="text-secondary small text-uppercase fw-bold d-block">Captain</label>
                         <span class="fs-5 text-white">{{ team.captain.username }}</span>
                     </div>
-                    <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="col-md-3 mb-3 mb-md-0">
                         <label class="text-secondary small text-uppercase fw-bold d-block">Vice Captain</label>
                         <span class="fs-5 text-white">{{ team.vice_captain.username }}</span>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <label class="text-secondary small text-uppercase fw-bold d-block">Individual Score</label>
+                            <span class="fs-5 fw-bold" style="color: var(--accent-purple);">
+                            {% if team.individual_points %}{{ team.individual_points }}{% else %}0{% endif %} pts
+                        </span>
+                    </div>
+                    <div class="col-md-3">
                         <label class="text-secondary small text-uppercase fw-bold d-block">Total Score</label>
-                        <span class="fs-5 fw-bold" style="color: var(--accent-purple);">
-                        {% if team.total_points %}{{ team.total_points }}{% else %}0{% endif %} pts
-                    </span>
+                            <span class="fs-5 fw-bold" style="color: var(--accent-purple);">
+                            {% if team.points %}{{ team.points }}{% else %}0{% endif %} pts
+                        </span>
                     </div>
                 </div>
             </div>
@@ -84,7 +90,7 @@
                                 <td class="py-3 text-end pe-3">
                                     <span class="badge"
                                           style="background-color: rgba(113, 48, 113, 0.2); color: var(--accent-purple); border: 1px solid var(--accent-purple);">
-                                        {{ participant.points }} pts
+                                        {{ participant.total_points }} pts
                                     </span>
                                 </td>
                             </tr>
